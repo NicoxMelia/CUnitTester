@@ -1,0 +1,20 @@
+{
+  "exercises": [
+    {
+      "title": "Double a number",
+      "description": "Write a program that reads an integer and prints its double.",
+      "test_cases": [
+        { "input": "4", "expected_output": "El doble es: 8" },
+        { "input": "10", "expected_output": "El doble es: 20" }
+      ]
+    },
+    {
+      "title": "Sum two numbers",
+      "description": "Read two numbers and print their sum.",
+      "test_cases": [
+        { "input": "3 5", "expected_output": "La suma es: 8" },
+        { "input": "10 15", "expected_output": "La suma es: 25" }
+      ]
+    }
+  ]
+}

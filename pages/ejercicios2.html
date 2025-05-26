@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📚 Lista de Ejercicios C++</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .test-table {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .test-table.show {
+            max-height: 500px;
+            transition: max-height 0.5s ease-in;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <!-- <header class="mb-8 text-center">
+            <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent mb-2">
+                🚀 Lista de Ejercicios C++
+            </h1>
+            <p class="text-gray-400">Selecciona un ejercicio para probarlo en el C++ to JS Tester</p>
+        </header> -->
+
+        <!-- Lista de ejercicios -->
+        <div id="ejerciciosContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+            <!-- Los ejercicios se cargarán aquí dinámicamente -->
+            <div class="text-center py-8 text-gray-500 col-span-full">
+                <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                <p>Cargando ejercicios...</p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <!-- <footer class="mt-12 text-center text-gray-500 text-sm">
+            <p>👨‍💻 Creado con ❤️ para practicar C++ en el navegador</p>
+            <p class="mt-1">🔄 Recarga la página para obtener los últimos ejercicios</p>
+        </footer> -->
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('../js/ejercicios2.json')
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('ejerciciosContainer');
+                    container.innerHTML = '';
+                    
+                    data.ejercicios.forEach(ejercicio => {
+                        const ejercicioCard = document.createElement('div');
+                        ejercicioCard.className = 'bg-gray-800 rounded-lg overflow-hidden shadow-xl hover:shadow-2xl transition-shadow col-span-full';
+                        ejercicioCard.innerHTML = `
+                            <div class="p-5">
+                                <div class="flex justify-between items-start mb-3">
+                                    <div>
+                                        <h3 class="text-xl font-bold text-blue-400">${ejercicio.titulo}</h3>
+                                        <p class="text-gray-300 mt-1">${ejercicio.descripcion}</p>
+                                    </div>
+                                    <!--<span class="bg-purple-600 text-xs px-2 py-1 rounded-full">${ejercicio.id}</span>-->
+                                </div>
+                                
+                                <!-- Botón para mostrar/ocultar casos de prueba -->
+                                <button class="toggle-tests-btn w-full bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-md font-medium transition-colors text-center mt-3 mb-3">
+                                    <i class="fas fa-vial mr-2"></i> Mostrar ${ejercicio.tests.length} casos de prueba <i class="fas fa-chevron-down ml-2"></i>
+                                </button>
+                                
+                                <!-- Tabla de casos de prueba (inicialmente oculta) -->
+                                <div class="test-table bg-gray-750 rounded-md overflow-hidden">
+                                    <table class="w-full text-sm">
+                                        <thead class="bg-gray-700">
+                                            <tr>
+                                                <th class="px-4 py-2 text-left">#</th>
+                                                <th class="px-4 py-2 text-left">📥 Input</th>
+                                                <th class="px-4 py-2 text-left">📤 Output Esperado</th>
+                                                <th class="px-4 py-2 text-left">💡 Explicación</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${ejercicio.tests.map((test, index) => `
+                                                <tr class="border-b border-gray-700 ${index % 2 === 0 ? 'bg-gray-750' : 'bg-gray-700'}">
+                                                    <td class="px-4 py-2 font-mono">${index + 1}</td>
+                                                    <td class="px-4 py-2 font-mono">${test.input}</td>
+                                                    <td class="px-4 py-2 font-mono">${test.output}</td>
+                                                    <td class="px-4 py-2 text-gray-400">${test.explicacion || '-'}</td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <!-- Botón para abrir en el code runner -->
+                                <a href="../index.html?ejercicio=${ejercicio.id}" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors text-center block mt-4">
+                                    <i class="fas fa-play mr-2"></i> Probar este ejercicio
+                                </a>
+                            </div>
+                        `;
+                        container.appendChild(ejercicioCard);
+                        
+                        // Agregar funcionalidad de mostrar/ocultar tests
+                        const toggleBtn = ejercicioCard.querySelector('.toggle-tests-btn');
+                        const testTable = ejercicioCard.querySelector('.test-table');
+                        
+                        toggleBtn.addEventListener('click', function() {
+                            testTable.classList.toggle('show');
+                            const icon = toggleBtn.querySelector('.fa-chevron-down');
+                            if (testTable.classList.contains('show')) {
+                                toggleBtn.innerHTML = `<i class="fas fa-vial mr-2"></i> Ocultar ${ejercicio.tests.length} casos de prueba <i class="fas fa-chevron-up ml-2"></i>`;
+                            } else {
+                                toggleBtn.innerHTML = `<i class="fas fa-vial mr-2"></i> Mostrar ${ejercicio.tests.length} casos de prueba <i class="fas fa-chevron-down ml-2"></i>`;
+                            }
+                        });
+                    });
+                })
+                .catch(error => {
+                    const container = document.getElementById('ejerciciosContainer');
+                    container.innerHTML = `
+                        <div class="col-span-full text-center py-8 text-red-400">
+                            <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
+                            <p>Error al cargar los ejercicios</p>
+                            <p class="text-xs mt-2">${error.message}</p>
+                        </div>
+                    `;
+                });
+        });
+    </script>
+</body>
+</html>

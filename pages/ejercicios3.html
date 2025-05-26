@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📚 Lista de Ejercicios C++</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .casos-prueba {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .casos-prueba.mostrar {
+            max-height: 500px;
+            transition: max-height 0.5s ease-in;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <!-- <header class="mb-8 text-center">
+            <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent mb-2">
+                🚀 Lista de Ejercicios C++
+            </h1>
+            <p class="text-gray-400">Selecciona un ejercicio para probarlo en el C++ to JS Tester</p>
+        </header> -->
+
+        <!-- Lista de ejercicios -->
+        <div id="ejerciciosContainer" class="grid grid-cols-1 gap-8">
+            <!-- Los ejercicios se cargarán aquí dinámicamente -->
+            <div class="text-center py-8 text-gray-500">
+                <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                <p>Cargando ejercicios...</p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <!-- <footer class="mt-12 text-center text-gray-500 text-sm">
+            <p>👨‍💻 Creado con ❤️ para practicar C++ en el navegador</p>
+            <p class="mt-1">🔄 Recarga la página para obtener los últimos ejercicios</p>
+        </footer> -->
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('../js/ejercicios3.json')
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('ejerciciosContainer');
+                    container.innerHTML = '';
+                    
+                    data.ejercicios.forEach(ejercicio => {
+                        const ejercicioCard = document.createElement('div');
+                        ejercicioCard.className = 'bg-gray-800 rounded-lg overflow-hidden shadow-xl hover:shadow-2xl transition-shadow';
+                        
+                        // Crear elementos de la descripción
+                        const descripcionContainer = document.createElement('div');
+                        descripcionContainer.className = 'prose prose-invert max-w-none text-gray-300';
+                        
+                        // Enunciado
+                        const enunciado = document.createElement('p');
+                        enunciado.textContent = ejercicio.descripcion.enunciado;
+                        descripcionContainer.appendChild(enunciado);
+                        
+                        // Requisitos
+                        const requisitosTitulo = document.createElement('p');
+                        requisitosTitulo.className = 'font-bold mt-4';
+                        requisitosTitulo.textContent = 'Requisitos:';
+                        descripcionContainer.appendChild(requisitosTitulo);
+                        
+                        const listaRequisitos = document.createElement('ul');
+                        listaRequisitos.className = 'list-disc pl-5';
+                        
+                        ejercicio.descripcion.requisitos.forEach(requisito => {
+                            const item = document.createElement('li');
+                            item.innerHTML = requisito.replace(/`(.*?)`/g, '<code>$1</code>');
+                            listaRequisitos.appendChild(item);
+                        });
+                        descripcionContainer.appendChild(listaRequisitos);
+                        
+                        // Ejemplos
+                        const ejemploTitulo = document.createElement('p');
+                        ejemploTitulo.className = 'font-bold mt-4';
+                        ejemploTitulo.textContent = 'Ejemplos:';
+                        descripcionContainer.appendChild(ejemploTitulo);
+                        
+                        const listaEjemplos = document.createElement('ul');
+                        listaEjemplos.className = 'list-disc pl-5';
+                        
+                        ejercicio.descripcion.ejemplos.forEach(ejemplo => {
+                            const item = document.createElement('li');
+                            item.innerHTML = ejemplo.replace(/→/g, '→').replace(/"(.*?)"/g, '<code>"$1"</code>');
+                            listaEjemplos.appendChild(item);
+                        });
+                        descripcionContainer.appendChild(listaEjemplos);
+                        
+                        // Construir la tarjeta completa
+                        ejercicioCard.innerHTML = `
+                            <div class="p-6">
+                                <div class="flex justify-between items-start mb-4">
+                                    <div>
+                                        <h3 class="text-2xl font-bold text-blue-400 mb-2">${ejercicio.titulo}</h3>
+                                        <!-- Descripción se insertará aquí -->
+                                    </div>
+                                    <span class="bg-purple-600 text-sm px-3 py-1 rounded-full">Ejercicio ${ejercicio.id}</span>
+                                </div>
+                                
+                                <!-- Descripción -->
+                                <div id="descripcion-${ejercicio.id}"></div>
+                                
+                                <!-- Botón para mostrar/ocultar casos de prueba -->
+                                <button class="toggle-casos-btn w-full bg-gray-700 hover:bg-gray-600 text-white px-4 py-3 rounded-md font-medium transition-colors text-left mt-4 mb-3 flex items-center justify-between">
+                                    <span>
+                                        <i class="fas fa-vial mr-2"></i> 
+                                        Ver ${ejercicio.casosPrueba.length} casos de prueba
+                                    </span>
+                                    <i class="fas fa-chevron-down ml-2"></i>
+                                </button>
+                                
+                                <!-- Tabla de casos de prueba (inicialmente oculta) -->
+                                <div class="casos-prueba bg-gray-750 rounded-md overflow-hidden">
+                                    <table class="w-full text-sm">
+                                        <thead class="bg-gray-700">
+                                            <tr>
+                                                <th class="px-4 py-3 text-left">#</th>
+                                                <th class="px-4 py-3 text-left">📥 Entrada</th>
+                                                <th class="px-4 py-3 text-left">📤 Salida Esperada</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tabla-casos-${ejercicio.id}">
+                                            <!-- Filas de casos se insertarán aquí -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <!-- Botón para abrir en el code runner -->
+                                <a href="../index.html?ejercicio=E${ejercicio.id}" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-md font-medium transition-colors text-center block mt-4 flex items-center justify-center">
+                                    <i class="fas fa-play mr-2"></i> Probar este ejercicio
+                                </a>
+                            </div>
+                        `;
+                        
+                        // Insertar la descripción
+                        const descripcionSlot = ejercicioCard.querySelector(`#descripcion-${ejercicio.id}`);
+                        descripcionSlot.appendChild(descripcionContainer);
+                        
+                        // Insertar los casos de prueba
+                        const tablaBody = ejercicioCard.querySelector(`#tabla-casos-${ejercicio.id}`);
+                        ejercicio.casosPrueba.forEach((caso, index) => {
+                            const fila = document.createElement('tr');
+                            fila.className = `border-b border-gray-700 ${index % 2 === 0 ? 'bg-gray-750' : 'bg-gray-700'}`;
+                            fila.innerHTML = `
+                                <td class="px-4 py-3 font-mono">${index + 1}</td>
+                                <td class="px-4 py-3 font-mono">${caso.entrada}</td>
+                                <td class="px-4 py-3 font-mono">${caso.salida}</td>
+                            `;
+                            tablaBody.appendChild(fila);
+                        });
+                        
+                        container.appendChild(ejercicioCard);
+                        
+                        // Agregar funcionalidad de mostrar/ocultar casos
+                        const toggleBtn = ejercicioCard.querySelector('.toggle-casos-btn');
+                        const casosSection = ejercicioCard.querySelector('.casos-prueba');
+                        
+                        toggleBtn.addEventListener('click', function() {
+                            casosSection.classList.toggle('mostrar');
+                            const icon = toggleBtn.querySelector('.fa-chevron-down');
+                            if (casosSection.classList.contains('mostrar')) {
+                                toggleBtn.innerHTML = `
+                                    <span>
+                                        <i class="fas fa-vial mr-2"></i> 
+                                        Ocultar ${ejercicio.casosPrueba.length} casos de prueba
+                                    </span>
+                                    <i class="fas fa-chevron-up ml-2"></i>
+                                `;
+                            } else {
+                                toggleBtn.innerHTML = `
+                                    <span>
+                                        <i class="fas fa-vial mr-2"></i> 
+                                        Ver ${ejercicio.casosPrueba.length} casos de prueba
+                                    </span>
+                                    <i class="fas fa-chevron-down ml-2"></i>
+                                `;
+                            }
+                        });
+                    });
+                })
+                .catch(error => {
+                    const container = document.getElementById('ejerciciosContainer');
+                    container.innerHTML = `
+                        <div class="text-center py-8 text-red-400">
+                            <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
+                            <p>Error al cargar los ejercicios</p>
+                            <p class="text-xs mt-2">${error.message}</p>
+                        </div>
+                    `;
+                });
+        });
+    </script>
+</body>
+</html>

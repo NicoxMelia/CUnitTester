@@ -1,0 +1,50 @@
+{
+  "ejercicios": [
+    {
+      "id": "E1",
+      "titulo": "🔄 Calcular el doble",
+      "descripcion": "Escribe un programa que tome un número como entrada y muestre su doble.",
+      "codigo": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int number;\n    cin >> number;\n    cout << \"El doble es: \" << number * 2 << endl;\n    return 0;\n}",
+      "tests": [
+        {
+          "input": "5",
+          "output": "El doble es: 10",
+          "explicacion": "El doble de 5 es 10"
+        },
+        {
+          "input": "0",
+          "output": "El doble es: 0",
+          "explicacion": "El doble de 0 es 0"
+        },
+        {
+          "input": "-3",
+          "output": "El doble es: -6",
+          "explicacion": "El doble de un negativo también se calcula"
+        }
+      ]
+    },
+    {
+      "id": "E2",
+      "titulo": "🔢 Suma de dos números",
+      "descripcion": "Crea un programa que sume dos números ingresados por el usuario.",
+      "codigo": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int a, b;\n    cin >> a >> b;\n    cout << \"La suma es: \" << a + b << endl;\n    return 0;\n}",
+      "tests": [
+        {
+          "input": "2 3",
+          "output": "La suma es: 5",
+          "explicacion": "Suma básica de positivos"
+        },
+        {
+          "input": "10 -5",
+          "output": "La suma es: 5",
+          "explicacion": "Suma con número negativo"
+        },
+        {
+          "input": "0 0",
+          "output": "La suma es: 0",
+          "explicacion": "Suma de ceros"
+        }
+      ]
+    }
+  ]
+}
