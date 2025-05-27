@@ -104,45 +104,108 @@
             }
         }
 
+
+        //*********************************************************** */
         // Manejo de la interfaz
 document.addEventListener('DOMContentLoaded', () => {
+
+    
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const ejercicioId = urlParams.get("ejercicio");
+    var ejercicio = null;
+
+    if (ejercicioId) {
+        const consignaContainer = document.getElementById("consignaContainer");
+        const tablaCasos = document.getElementById("tablaCasos");
+
+        if (consignaContainer && tablaCasos) {
+            consignaContainer.innerHTML = `<div class="text-gray-400">⏳ Cargando consigna...</div>`;
+            tablaCasos.innerHTML = "";
+
+            fetch("./js/ejercicios4.json")
+                .then(res => res.json())
+                .then(data => {
+                    ejercicio = data.exercises.find(e => e.id === ejercicioId);
+
+                    if (!ejercicio) {
+                        consignaContainer.innerHTML = `<div class="text-red-500 font-semibold">❌ Ejercicio no encontrado</div>`;
+                        return;
+                    }
+
+                    // Mostrar consigna
+                    consignaContainer.innerHTML = `
+                        <h2 class="text-2xl font-bold text-cyan-400 mb-2 flex items-center gap-2">
+                            📘 ${ejercicio.title}
+                        </h2>
+                        <p class="text-gray-300 mb-4">${ejercicio.description}</p>`;
+
+                    // Mostrar tabla de casos
+                    let tablaHTML = `
+                        <table class="w-full text-sm text-left text-gray-300 border border-gray-600">
+                            <thead class="bg-gray-700 text-xs uppercase text-gray-400">
+                                <tr>
+                                    <th class="px-3 py-2 border border-gray-600">Input</th>
+                                    <th class="px-3 py-2 border border-gray-600">Expected Output</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+
+                    ejercicio.test_cases.forEach(test => {
+                        tablaHTML += `
+                            <tr class="bg-gray-800">
+                                <td class="px-3 py-2 border border-gray-700 font-mono">${test.input}</td>
+                                <td class="px-3 py-2 border border-gray-700 font-mono">${test.expected_output}</td>
+                            </tr>`;
+                    });
+
+                    tablaHTML += `</tbody></table>`;
+                    tablaCasos.innerHTML = tablaHTML;
+                })
+                .catch(err => {
+                    consignaContainer.innerHTML = `<div class="text-red-500 font-semibold">⚠️ Error al cargar el ejercicio</div>`;
+                    console.error(err);
+                });
+        }
+    }
+
     // Añadir nuevo test
-    document.getElementById('addTestBtn').addEventListener('click', () => {
-        const testCase = document.createElement('div');
-        testCase.className = 'test-case bg-gray-750 p-3 rounded-md';
-        testCase.innerHTML = `
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-2">
-                <div>
-                    <label class="block text-xs text-gray-400 mb-1">Input</label>
-                    <input type="text" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" placeholder="Valor de entrada">
-                </div>
-                <div>
-                    <label class="block text-xs text-gray-400 mb-1">Output Esperado</label>
-                    <input type="text" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" placeholder="Resultado esperado">
-                </div>
-            </div>
-            <button class="remove-test bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-xs transition-colors">
-                Eliminar Test
-            </button>
-        `;
-        document.getElementById('testCases').appendChild(testCase);
+    // document.getElementById('addTestBtn').addEventListener('click', () => {
+    //     const testCase = document.createElement('div');
+    //     testCase.className = 'test-case bg-gray-750 p-3 rounded-md';
+    //     testCase.innerHTML = `
+    //         <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-2">
+    //             <div>
+    //                 <label class="block text-xs text-gray-400 mb-1">Input</label>
+    //                 <input type="text" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" placeholder="Valor de entrada">
+    //             </div>
+    //             <div>
+    //                 <label class="block text-xs text-gray-400 mb-1">Output Esperado</label>
+    //                 <input type="text" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" placeholder="Resultado esperado">
+    //             </div>
+    //         </div>
+    //         <button class="remove-test bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-xs transition-colors">
+    //             Eliminar Test
+    //         </button>
+    //     `;
+    //     document.getElementById('testCases').appendChild(testCase);
         
-        // Añadir evento al nuevo botón de eliminar
-        testCase.querySelector('.remove-test').addEventListener('click', () => {
-            testCase.remove();
-        });
-    });
+    //     // Añadir evento al nuevo botón de eliminar
+    //     testCase.querySelector('.remove-test').addEventListener('click', () => {
+    //         testCase.remove();
+    //     });
+    // });
     
     // Delegación de eventos para botones de eliminar existentes
-    document.getElementById('testCases').addEventListener('click', (e) => {
-        if (e.target.classList.contains('remove-test')) {
-            e.target.closest('.test-case').remove();
-        }
-    });
+    // document.getElementById('testCases').addEventListener('click', (e) => {
+    //     if (e.target.classList.contains('remove-test')) {
+    //         e.target.closest('.test-case').remove();
+    //     }
+    // });
     
     // Ejecutar tests
     document.getElementById('runBtn').addEventListener('click', async () => {
-        const cppCode = document.getElementById('cppCode').value;
+        const cppCode = document.getElementById("cppCode").value; // Obtener código C++ del editor
         const jsCode = translateCppToJs(cppCode);
         
         // Mostrar JS generado
@@ -150,13 +213,10 @@ document.addEventListener('DOMContentLoaded', () => {
         Prism.highlightAll();
         
         // Obtener tests
-        const testCases = Array.from(document.querySelectorAll('.test-case')).map(el => {
-            const inputs = el.querySelectorAll('input');
-            return {
-                input: inputs[0].value,
-                expected: inputs[1].value
-            };
-        });
+        const testCases = ejercicio.test_cases.map(tc => ({
+                    input: tc.input,
+                    expected: tc.expected_output
+        }));
         
         // Mostrar resultados
         const resultsContainer = document.getElementById('testResults');
@@ -246,62 +306,4 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// Mostrar consigna y tabla de test cases si hay ?ejercicio=Ex en la URL
-document.addEventListener("DOMContentLoaded", () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const ejercicioId = urlParams.get("ejercicio");
 
-    if (ejercicioId) {
-        const consignaContainer = document.getElementById("consignaContainer");
-        const tablaCasos = document.getElementById("tablaCasos");
-
-        if (consignaContainer && tablaCasos) {
-            consignaContainer.innerHTML = `<div class="text-gray-400">⏳ Cargando consigna...</div>`;
-            tablaCasos.innerHTML = "";
-
-            fetch("./js/ejercicios4.json")
-                .then(res => res.json())
-                .then(data => {
-                    const ejercicio = data.exercises.find(e => e.id === ejercicioId);
-
-                    if (!ejercicio) {
-                        consignaContainer.innerHTML = `<div class="text-red-500 font-semibold">❌ Ejercicio no encontrado</div>`;
-                        return;
-                    }
-
-                    // Mostrar consigna
-                    consignaContainer.innerHTML = `
-                        <h2 class="text-2xl font-bold text-cyan-400 mb-2 flex items-center gap-2">
-                            📘 ${ejercicio.title}
-                        </h2>
-                        <p class="text-gray-300 mb-4">${ejercicio.description}</p>`;
-
-                    // Mostrar tabla de casos
-                    let tablaHTML = `
-                        <table class="w-full text-sm text-left text-gray-300 border border-gray-600">
-                            <thead class="bg-gray-700 text-xs uppercase text-gray-400">
-                                <tr>
-                                    <th class="px-3 py-2 border border-gray-600">Input</th>
-                                    <th class="px-3 py-2 border border-gray-600">Expected Output</th>
-                                </tr>
-                            </thead>
-                            <tbody>`;
-
-                    ejercicio.test_cases.forEach(test => {
-                        tablaHTML += `
-                            <tr class="bg-gray-800">
-                                <td class="px-3 py-2 border border-gray-700 font-mono">${test.input}</td>
-                                <td class="px-3 py-2 border border-gray-700 font-mono">${test.expected_output}</td>
-                            </tr>`;
-                    });
-
-                    tablaHTML += `</tbody></table>`;
-                    tablaCasos.innerHTML = tablaHTML;
-                })
-                .catch(err => {
-                    consignaContainer.innerHTML = `<div class="text-red-500 font-semibold">⚠️ Error al cargar el ejercicio</div>`;
-                    console.error(err);
-                });
-        }
-    }
-});
