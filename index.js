@@ -12,8 +12,30 @@
         .replace(/using\s+namespace\s+std\s*;/g, '')
         .replace(/\/\/.*$/gm, '');
 
-    // 2. Declaración de variables
-    jsCode = jsCode.replace(/\b(int|double|float|char|string|bool)\s+([a-zA-Z_]\w*)(\s*=\s*[^;]+)?\s*;/g, 'let $2$3;');
+    // 2. Declaración de variables y funciones
+    jsCode = jsCode
+    // Variables normales
+    .replace(/\b(int|double|float|char|string|bool)\s+([a-zA-Z_]\w*)(\s*=\s*[^;]+)?\s*;/g, 'let $2$3;')
+    // Funciones (que no sean main)
+    .replace(/\b(int|double|float|char|string|bool|void)\s+([a-zA-Z_]\w*)\s*\(([^)]*)\)\s*{/g, 
+    (match, returnType, funcName, params) => {
+        const jsParams = params.split(',')
+            .map(p => p
+                // Eliminar el tipo de dato (int, double, etc.)
+                .replace(/\b(int|double|float|char|string|bool)\s+/, '')
+                // Eliminar corchetes [] al final del nombre
+                .replace(/\s*\[\s*\]\s*$/, '')
+                .trim()
+            )
+            .filter(Boolean)
+            .join(', ');
+
+        
+        const jsReturnType = returnType === 'void' ? '' : 'return';
+        console.log(`Función detectada: ${funcName}(${jsParams}) con tipo de retorno ${jsReturnType}`);
+        return `function ${funcName}(${jsParams}) {`;
+    });
+
 
     // 3. Entrada con cin: soporta múltiples variables
     jsCode = jsCode.replace(/cin\s*>>\s*([a-zA-Z_]\w*(\s*>>\s*[a-zA-Z_]\w*)*)\s*;/g, (match, vars) => {
@@ -57,8 +79,30 @@
         .replace(/\bthrow\s+([^;]+);/g, 'throw $1;');
 
     // 8. Función main
-    jsCode = jsCode.replace(/int\s+main\s*\(\s*\)\s*{/, 'async function main() {');
-    jsCode = jsCode.replace(/\breturn\s+0\s*;/g, '');
+    jsCode = jsCode
+    .replace(/int\s+main\s*\(\s*(int\s+argc\s*,\s*char\s*\*\s*argv\s*\[\s*\]\s*)?\)\s*{/g, 'async function main() {')
+    .replace(/\breturn\s+0\s*;/g, '');
+
+    // 9. Manejo de arrays y matrices
+    jsCode = jsCode
+    // Arrays unidimensionales
+    .replace(/\b(int|double|float|char|string|bool)\s+([a-zA-Z_]\w*)\s*\[\s*\]\s*(=\s*{([^}]+)})?\s*;/g, 'let $2 = [$4];')
+    // Arrays con tamaño fijo
+    .replace(/\b(int|double|float|char|string|bool)\s+([a-zA-Z_]\w*)\s*\[\s*(\d+)\s*\]\s*;/g, 'let $2 = new Array($3);')
+    .replace(
+    /([a-zA-Z_]\w*)\s*=\s*{\s*([^}]+)\s*}\s*;/g, '$1 = [$2];')
+    // Matrices bidimensionales
+    .replace(/\b(int|double|float|char|string|bool)\s+([a-zA-Z_]\w*)\s*\[\s*(\d+)\s*\]\s*\[\s*(\d+)\s*\]\s*;/g, 
+        'let $2 = Array($3).fill().map(() => Array($4));');
+
+
+        // Función para simular paso por referencia de C++
+        function passByReference(value) {
+            return {
+                get value() { return value; },
+                set value(newValue) { value = newValue; }
+            };
+        }
 
     // 9. Agregar funciones de soporte
     return `// Funciones de soporte
