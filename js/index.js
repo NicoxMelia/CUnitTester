@@ -1,4 +1,4 @@
-import {removeIncludes, putVariables, putVariables2, putFunctions, manageCin, manageCout, manageEndl, manageControlFlow, manageExceptions, putMain, manageArrays} from "./interpreters.js"; 
+import {removeIncludes, putVariables, replaceBasicOperations, putVariables2, putFunctions, manageCin, manageCout, manageEndl, manageControlFlow, manageExceptions, putMain, manageArrays} from "./interpreters.js"; 
 import { putExtraFunctions } from "./extraFunctions.js";
 
 // Variables globales
@@ -20,6 +20,7 @@ function translateCppToJs(cppCode) {
     jsCode = putMain(jsCode);
     jsCode = manageArrays(jsCode);
     jsCode = putVariables2(jsCode);
+    jsCode = replaceBasicOperations(jsCode);
 
     // Función para simular paso por referencia de C++
     function passByReference(value) {

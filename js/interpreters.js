@@ -68,6 +68,17 @@ function manageCin(jsCode) {
 
 }
 
+function replaceBasicOperations(jsCode) {
+    // Suma, resta, multiplicación, división, módulo
+    jsCode = jsCode.replace(
+        /(\w+)\s*=\s*([a-zA-Z_]\w*)\s*([\+\-\*\/%])\s*([a-zA-Z_]\w*)\s*;/g,
+        (match, variable, op1, operator, op2) => {
+            return `${variable} = ${op1} ${operator} ${op2};`;
+        }
+    );
+    return jsCode;
+}
+
 function manageCout(jsCode) {
 
 // 4. Salida con cout y <<
@@ -154,7 +165,7 @@ function manageArrays(jsCode) {
 }
 
 
-export {removeIncludes, putVariables, putVariables2, putFunctions, manageCin, manageCout, manageEndl, manageControlFlow, manageExceptions, putMain, manageArrays};
+export {removeIncludes, putVariables, replaceBasicOperations, putVariables2, putFunctions, manageCin, manageCout, manageEndl, manageControlFlow, manageExceptions, putMain, manageArrays};
     
 
     
