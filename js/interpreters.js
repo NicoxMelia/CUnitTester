@@ -17,10 +17,26 @@ function putVariables(jsCode) {
     return jsCode;
 }
 
+function putVariables2(jsCode) {
+    jsCode = jsCode.replace(
+            /\b(int|double|float|char|string|bool)\s+([^;]+);/g,
+            (match, tipo, vars) => {
+                return vars
+                    .split(',')
+                    .map(v => `let ${v.trim()};`)
+                    .join('\n');
+            }
+        );
+    return jsCode;
+}
+
 function putFunctions(jscode) {
 
     jscode = jscode.replace(/\b(int|double|float|char|string|bool|void)\s+([a-zA-Z_]\w*)\s*\(([^)]*)\)\s*{/g, 
     (match, returnType, funcName, params) => {
+        if(funcName === 'main') {
+            return "int main() {";
+        }
         const jsParams = params.split(',')
             .map(p => p
                 // Eliminar el tipo de dato (int, double, etc.)
@@ -138,7 +154,7 @@ function manageArrays(jsCode) {
 }
 
 
-export {removeIncludes, putVariables, putFunctions, manageCin, manageCout, manageEndl, manageControlFlow, manageExceptions, putMain, manageArrays};
+export {removeIncludes, putVariables, putVariables2, putFunctions, manageCin, manageCout, manageEndl, manageControlFlow, manageExceptions, putMain, manageArrays};
     
 
     
